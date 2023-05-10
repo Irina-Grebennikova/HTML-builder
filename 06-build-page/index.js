@@ -56,22 +56,32 @@ mergeStyles();
 const folder = path.join(__dirname, "assets"),
   folderCopy = path.join(distFolder, "assets");
 
-async function copyAssets(dir) {
-  fs.readdir(dir, (err, items) => {
-
-    for (let i = 0; i < items.length; i++) {
-
-      if (fs.lstatSync(path.join(dir, items[i])).isDirectory()) {
-        (async () => {
-          await mkdir(path.join(folderCopy, items[i]), { recursive: true });
-          copyAssets(path.join(dir, items[i]));
-        })();
-      } else {
-        let dirToCopy = dir.replace("assets", "project-dist\\assets");
-        copyFile(path.join(dir, items[i]), path.join(dirToCopy, items[i]));
-      }
+function copyAssets(dir, copydir) {
+  fs.mkdir(
+    path.join(copydir),
+    {
+      recursive: true,
+    },
+    () => {
+      readdir(path.join(dir), {
+        withFileTypes: true,
+      }).then((contents) =>
+        contents.forEach((content) => {
+          if (content.isDirectory()) {
+            copyAssets(
+              path.join(dir, content.name),
+              path.join(copydir, content.name)
+            );
+          }
+          if (content.isFile()) {
+            copyFile(
+              path.join(dir, content.name),
+              path.join(copydir, content.name)
+            );
+          }
+        })
+      );
     }
-  });
+  );
 }
-
-copyAssets(folder);
+copyAssets(folder, folderCopy);
