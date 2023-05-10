@@ -16,3 +16,6 @@ process.on('exit', () => {
   stdout.write('Process was stopped. Goodbye!')
 })
 
+process.on('SIGINT', () => {
+  process.exit();
+})
